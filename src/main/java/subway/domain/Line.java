@@ -1,15 +1,16 @@
 package subway.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
-public class Station {
+public class Line {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,27 +19,19 @@ public class Station {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne
-    private Line line;
+    @OneToMany(mappedBy = "line")
+    private List<Station> stations = new ArrayList<>();
 
-    protected Station() {
+    protected Line() {
     }
 
-    public Station(String name, Line line) {
-        this.name = name;
-        this.line = line;
-    }
-
-    public Station(String name) {
+    public Line(String name) {
         this.name = name;
     }
 
-    public void changeName(String name) {
-        this.name = name;
-    }
-
-    public void changeLine(Line line) {
-        this.line = line;
+    public void addStations(Station station) {
+        this.stations.add(station);
+        station.changeLine(this);
     }
 
     public Long getId() {
@@ -49,7 +42,7 @@ public class Station {
         return name;
     }
 
-    public Line getLine() {
-        return line;
+    public List<Station> getStations() {
+        return stations;
     }
 }

@@ -11,7 +11,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 class StationRepositoryTest {
 
     @Autowired
-    protected StationRepository stationRepository;
+    private StationRepository stationRepository;
+
+    @Autowired
+    private LineRepository lineRepository;
 
     @Test
     void save() {
@@ -56,5 +59,47 @@ class StationRepositoryTest {
         Station foundStation = stationRepository.findByName("몽촌토성역");
 
         assertThat(foundStation).isNotNull();
+    }
+
+    @Test
+    void saveWithoutPersistLine() {
+        Line line = new Line("2호선");
+        stationRepository.save(new Station("잠실역", line));
+
+        stationRepository.flush();
+    }
+
+    @Test
+    void saveWithLine() {
+        Line line = lineRepository.save(new Line("2호선"));
+        stationRepository.save(new Station("잠실역", line));
+
+        stationRepository.flush();
+    }
+
+    @Test
+    void findByNameWithLine() {
+        Station station = stationRepository.findByName("교대역");
+
+        assertAll(() -> {
+            assertThat(station.getId()).isNotNull();
+            assertThat(station.getLine().getName()).isEqualTo("3호선");
+        });
+    }
+
+    @Test
+    void updateWithLine() {
+        Station station = stationRepository.findByName("교대역");
+        station.changeLine(lineRepository.save(new Line("2호선")));
+
+        stationRepository.flush();
+    }
+
+    @Test
+    void removeLine() {
+        Station station = stationRepository.findByName("교대역");
+        station.changeLine(null);
+
+        stationRepository.flush();
     }
 }
